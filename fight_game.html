@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="myCanvas" width="200" height="100"
+style="border:1px solid #c3c3c3;">
+Your browser does not support the canvas element.
+</canvas>
+
+<script>
+const items = [];
+
+let stampW = 15;
+let stampH = 15;
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+
+ctx.fillStyle = "brown";
+let monster1 = ctx.fillRect(0,0,10,10);
+items.push({exp: 74, name: 'ghoul', health: 180, x:0, y:0, w:10, h:10});
+
+let monster2 = ctx.fillRect(30,50,10,10);
+items.push({exp: 74, name: 'ghoul', health: 180, x:30, y:50, w:10, h:10});
+
+/*search function good for ranged attacks and get samiler number sizes in list of numbers */
+function getNearetNumbers(){
+let nearest = [];
+let indexAdded = [];
+let nearRange = 3;
+let y = 49;
+for (let i=0; i<x.length; i++){
+    for (let r=nearRange; r<y; r++){
+        /*array performance*/
+        if (!indexAdded.includes(i)){
+           if (Math.abs((x[i] - y)) <= nearRange){
+               console.log("yes found one", x[i]);
+               nearest.push(x[i]);
+               indexAdded.push(i);
+           }
+        }
+
+    }
+}
+}
+
+
+function detectClickMonsters(championCompass){
+  let actackedMonsters = [];
+  items.forEach( (monster)=>{
+    if (championCompass.x > monster.x-monster.w && championCompass.x < monster.x+monster.w){
+      actackedMonsters.push(monster);
+      
+      ctx.fillStyle = "#000000";
+      ctx.fillRect(monster.x-(monster.w),monster.y,monster.w*2,3);
+      
+      }
+  });
+  return actackedMonsters;
+}
+
+
+  canvas.addEventListener("click", (event)=>{
+    //alert(event.offsetX);
+    //alert(event.offsetY);
+    
+    console.log(detectClickMonsters({exp: 60000, name: 'Python King', health: 650, x:event.offsetX, y:event.offsetY, w:stampW, h:stampH}));
+    return false;
+   ctx.fillStyle = "#FF0000";
+   ctx.fillRect((event.offsetX - (stampW/2)),(event.offsetY-(stampH/2) + (stampH/45)),stampW,stampH);
+
+  });
+
+</script>
+
+</body>
+</html>
+
