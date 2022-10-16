@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+  
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Modal Example</h2>
+  <!-- Button to Open the Modal -->
+  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+    Open modal
+  </button>
+
+  <!-- The Modal -->
+  <div class="modal" id="myModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+      
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Modal Heading</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        
+        <!-- Modal body -->
+        <div class="modal-body">
+          Modal body..
+        </div>
+        
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+
+
+
+
+
+<img id="scream" width="35" height="35"
+src="https://i.ibb.co/wYyc259/iconimage.png" alt="The Scream">
+
+<img id="project_image" width="450" height="300"
+src="https://i.ibb.co/sK5HtQy/bulding-image.png" style="position:absolute;left:-15455px;">
+
+
+<p>Canvas:</p>
+
+<button onclick="drawProject()">Redraw things</button>
+
+<div id="currentStamp">
+
+</div>
+<canvas id="myCanvas" width="450" height="300"
+style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.
+</canvas>
+
+<script>
+
+const stampW = 35;
+const stampH = 35;
+
+const projectStamps = [{
+  title: 'repear',
+  image_id: 'scream',
+  x: 100,
+  y: 100,
+  id: 1
+}, {
+  title: 'repear2',
+  image_id: 'scream',
+  x: 100,
+  y: 100,
+  id: 122
+}, {
+  title: 'fix',
+  image_id: 'scream',
+  x: 200,
+  y: 100,
+  id: 2
+}, {
+  title: 'development',
+  image_id: 'scream',
+  x: 50,
+  y: 0,
+  id: 3
+}, {
+  title: 'guarding',
+  image_id: 'scream',
+  x: 170,
+  y: 0,
+  id: 4
+}];
+
+/* AI event listener fired when any shapes taregts clicked on canvas fast and accurate */
+
+let stampEventsOn = true;
+let stampEventsMouseOn = true;
+$(document).on('canvasStampClick', function(e, eventInfo) {
+
+  if (!stampEventsOn) {
+    return false;
+  }
+  //subscribers = $('.subscribers-testEvent');
+  console.log("hi canvasStampClick AI event listener CanvasEvents", e, eventInfo);
+
+  $("#currentStamp").html(`<span class="badge badge-secondary">${eventInfo.shape.title}</span>`);
+});
+
+$(document).on('canvasGroupStampClick', function(e, eventInfo) {
+  if (!stampEventsOn) {
+    return false;
+  }
+  $("#currentStamp").html('');
+  //subscribers = $('.subscribers-testEvent');
+  console.log("hi canvasGroupStampClick AI event listener CanvasEvents", e, eventInfo);
+
+  if (eventInfo && eventInfo.shapes && eventInfo.shapes.length) {
+    eventInfo.shapes.forEach((clickedShape) => {
+      $("#currentStamp").append(`<span class="badge badge-secondary">${clickedShape.title}</span>`);
+    });
+  }
+});
+
+/* onStampMouseEnter (1 time called only when enter stamp) */
+$(document).on('stampMouseEnter', function(e, eventInfo) {
+  if (!stampEventsMouseOn) {
+    return false;
+  }
+  console.log("stamp stampMouseEnter event listener");
+  $("#myCanvas").css('cursor', 'pointer');
+});
+
+/* onStampMouseOut (1 time called only when out from stamp) only recive one target, but it also have in event all targets has the same event in same point of time in each trigers  */
+$(document).on('stampMouseOut', function(e, eventInfo) {
+  if (!stampEventsMouseOn) {
+    return false;
+  }
+  console.log("stamp stampMouseOut event listener");
+  /*we can name this canvas.stamp:hover but with js*/
+  $("#myCanvas").css('cursor', 'default');
+});
+
+
+
+$(document).on('canvasStampUnFocus', function(e, eventInfo) {
+  if (!stampEventsOn) {
+    return false;
+  }
+  console.log('canvasStampUnFocus Event Listener CanvasEvents');
+
+  if ($("#currentStamp").html() !== '') {
+    $("#currentStamp").html('');
+  }
+
+});
+
+
+$("body").css('cursor', 'pointer');
+$("body").css('cursor', 'default');
+/*remove stamp event listener */
+
+$(document).on('canvasStampRemove', function(e, eventInfo) {
+  console.log("hi canvasStampRemove AI event listener", e, eventInfo);
+});
+
+
+let currentShapes = [];
+const canvas = document.getElementById("myCanvas");
+const ctx = canvas.getContext("2d");
+
+function validStampObj(stamp) {
+  if (!stamp || typeof(stamp.x) !== 'number' || typeof(stamp.y) !== 'number' || typeof(stamp.image_id) === 'undefined' || !document.getElementById(stamp.image_id)) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+
+function addStamp(stamp) {
+  if (!validStampObj(stamp)) {
+    console.log("can not add stamp, invalid object");
+    return false;
+  }
+
+  const image = document.getElementById(stamp.image_id);
+  stamp['w'] = image.getBoundingClientRect().width;
+  stamp['h'] = image.getBoundingClientRect().height;
+
+  ctx.drawImage(image, stamp.x, stamp.y, stamp.w, stamp.h);
+  currentShapes.push(stamp);
+  return stamp;
+
+}
+
+let id = 1;
+
+let currentMouseEnters = [];
+let currentMouseEntersShapes = [];
+window.onload = function() {
+
+  drawProject();
+
+  /* mousemove on canvas but target generate mouse was enter stamp but it now mouseover with js best was excute one time detect shapes but mouse enter in canvasevents */
+  canvas.addEventListener("mousemove", (event) => {
+
+    const data = detectClickMonsters({
+      event: event,
+      x: event.clientX,
+      y: event.offsetY,
+      w: stampW,
+      h: stampH
+    });
+    if (data && data.length) {
+      /* stamp mouse move and mouse enter events */
+      data.forEach((shape) => {
+        /* canvasEvents mouse enter */
+        if (!currentMouseEnters.includes(shape.id)) {
+          console.log("hi");
+          currentMouseEntersShapes.push(shape);
+          currentMouseEnters.push(shape.id);
+
+          $(document).trigger('stampMouseEnter', {
+            shape: shape,
+            shapes: data,
+            event: event
+          });
+
+        }
+      });
+    } else {
+      /*this first event mouseout call direct after mouse over  stamp event */
+      /* stamp mouse out event (this generated from mousemove event) */
+
+      if (currentMouseEntersShapes.length > 0) {
+        /*this means this first mouseout after mouse get out of stamp so we call our mouseout (remember this all mouse move event 3 from one also this make event call more performance as it call it only when stamp out not when mouse over no shapes work also with stampmouse over */
+        currentMouseEntersShapes.forEach((mouseOutShape) => {
+          /* maybe mouse outed from more than one shape */
+          $(document).trigger('stampMouseOut', {
+            shape: mouseOutShape,
+            shapes: currentMouseEntersShapes,
+            shapesid: currentMouseEnters,
+            event: event
+          });
+        });
+
+      }
+
+
+      currentMouseEnters = [];
+      currentMouseEntersShapes = [];
+    }
+
+    console.log(data, event.clientX, event.offsetY);
+  });
+  /* on stamp drag event top one */
+  /*used for generate stamp click event */
+  canvas.addEventListener("click", (event) => {
+
+
+    const data = detectClickMonsters({
+      event: event,
+      x: event.clientX,
+      y: event.offsetY,
+      w: stampW,
+      h: stampH
+    });
+
+
+    /* valid stamp click accion event click hander before end triger event lister canvasStampClick (study now in begning)  */
+    if (data && data.length > 0) {
+
+      /* trigger my custom event listener stampClicked/Focused */
+
+      /*fire event for all clicked elements shapes */
+
+      if (data.length == 1) {
+        $(document).trigger('canvasStampClick', {
+          shape: data[0],
+          event: event
+        });
+      } else {
+        $(document).trigger('canvasGroupStampClick', {
+          shapes: data,
+          event: event
+        });
+      }
+
+
+
+    } else {
+      /* trigger my custom event listener clickedEmptyArea no stamp unFocused stamp event (use it when work with stampclick) */
+      $(document).trigger('canvasStampUnFocus', {
+        event: event
+      });
+    }
+
+
+
+
+    //getRealNearstNumbers(isTouchFromRL, x:event.offsetX, y:event.offsetY, w:stampW, h:stampH});
+    //console.log(shapesDirections, isTouchFromRL, isTouchFromTB);
+    return false;
+
+  });
+
+
+
+
+};
+
+/*search function good for ranged attacks and get samiler number sizes in list of numbers */
+function getNearetNumbers(x = [], y = 0, nearRange = 3, ai = true) {
+  const nearest = [];
+  const indexAdded = [];
+  for (let i = 0; i < x.length; i++) {
+    for (let r = nearRange; r < y; r++) {
+      /*array performance*/
+      if (!indexAdded.includes(i)) {
+        if (Math.abs((x[i] - y)) <= nearRange) {
+          //console.log("yes found one", x[i]);
+          nearest.push(x[i]);
+          indexAdded.push(i);
+        }
+      }
+
+    }
+  }
+  return {
+    nearest: nearest,
+    indexAdded: indexAdded
+  };
+}
+
+
+function getDirectionLists(shapesList = []) {
+  const directLists = {
+    xList: [],
+    yList: [],
+    wList: [],
+    hList: []
+  };
+  shapesList.forEach((shapeObj) => {
+    if (validStampObj(shapeObj)) {
+      directLists.xList.push(shapeObj.x);
+      directLists.yList.push(shapeObj.y);
+      directLists.wList.push(shapeObj.w);
+      directLists.hList.push(shapeObj.h);
+    }
+  });
+  return directLists;
+}
+
+function detectClickMonsters(championCompass) {
+
+  let clickedShapes = [];
+  currentShapes.forEach((shape) => {
+    if (championCompass.x > shape.x && championCompass.x < shape.x + shape.w && (championCompass.y > shape.y && championCompass.y < shape.y + shape.h)) {
+      clickedShapes.push(shape);
+    }
+  });
+  return clickedShapes;
+}
+
+
+
+function clearCanvas() {
+  currentShapes = [];
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  return true;
+}
+
+const projectImage = document.getElementById("project_image");
+
+function drawProject() {
+  if (!projectImage) {
+    console.log('missing project image element');
+    return false;
+  }
+  clearCanvas();
+  ctx.drawImage(projectImage, 0, 0);
+  projectStamps.forEach((stamp) => {
+    addStamp(stamp);
+  });
+  // console.log(currentShapes);
+}
+
+function removeStamp(targetId) {
+  let targetI = false;
+  for (let i = 0; i < projectStamps.length; i++) {
+    if (projectStamps[i].id == targetId) {
+      targetI = i;
+      break;
+    }
+  }
+  if (targetI !== false) {
+    /* remove the stamp from drawing stamps list and redraw the data */
+    projectStamps.splice(targetI, 1);
+    drawProject();
+    $(document).trigger('canvasStampRemove', {
+      shape: projectStamps[targetI]
+    });
+  }
+}
+removeStamp(3);
+
+</script>
+
+</body>
+</html>
