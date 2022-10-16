@@ -83,6 +83,11 @@ $(document).on('canvasStampClick', function(e, eventInfo) {
   $("#currentStamp").html(`<span class="badge badge-secondary">${eventInfo.shape.title}</span>`);
 });
 
+/*remove stamp event listener */
+
+$(document).on('canvasStampRemove', function(e, eventInfo) { 
+  console.log("hi canvasStampRemove AI event listener", e,eventInfo);
+});
 
 
 let currentShapes = [];
@@ -120,7 +125,8 @@ window.onload = function() {
 
 drawProject();
 
-  canvas.addEventListener("click", (event)=>{   
+  canvas.addEventListener("click", (event)=>{  
+  $("#currentStamp").html("");
     console.log(detectClickMonsters({event: event, x:event.clientX, y:event.offsetY, w:stampW, h:stampH}));
 
 
@@ -216,9 +222,10 @@ function removeStamp(targetId){
     /* remove the stamp from drawing stamps list and redraw the data */
     projectStamps.splice(targetI,1);
     drawProject();
+    $(document).trigger('canvasStampRemove', {shape: projectStamps[targetI]});
   }
 }
-//removeStamp(3);
+removeStamp(3);
 
 </script>
 
