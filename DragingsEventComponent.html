@@ -9,7 +9,11 @@
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
   <style>
-  
+  html, body{
+      cursor: default;
+    height: auto;
+    min-height: 700px;
+  }
   </style>
 </head>
 <body>
@@ -23,11 +27,12 @@
 <img src="https://ib.3lift.com/static/buttons/edaa/OBA_UK.png">
 </div>
 <script>
-const eventCursors = {
+/* easy custom cursor of choisen event */
+let eventCursors = {
   dragEnd: 'default',
   dragStart: 'grab',
   drageOver: 'grabbing',
-  dragRelaseCancel: 'grab',
+  dragRelaseCancel: 'none',
   dragOverOutTarget: 'no-drop',
   drop: 'grab'
 
@@ -37,9 +42,10 @@ const eventCursors = {
 /* this map of js events and settimes that set on drag all events no one of used made by js dom or real event listener direct (no ondrag Add event listener)*/
 /* code for detect mouse hold to generate event like on drage start  */
 /* when make hold time wait smoth it will give advanced mouse user abilty to redit  fast hold-relase mouse action else , this can provide drag DOM, Canvas, and javascript events before  drag event listener created based on other existing event not random js */
-const holdWait = 300;
+const holdWait = 30;
 /*we can say the skill cooldown for dragout target event lister*/
 const dragTriggerWait = 1;
+const delayBeforeLastCursor = 150;
 let mouseDown = 0;
 let mouseDragStart = false;
 let mouseDragEvent = false;
@@ -315,7 +321,7 @@ function dragEndCB(event, elmSelector = canvasSelector, cancled = false) {
     clearTimeout(lastCursorTimeout);
 
   }
-   lastCursorTimeout = setTimeout( ()=>{document.body.style.cursor = eventCursors.dragEnd;}, 300); 
+   lastCursorTimeout = setTimeout( ()=>{document.body.style.cursor = eventCursors.dragEnd;}, delayBeforeLastCursor); 
   console.log("on drag end event, Cancled:", cancled);
 }
 /*for fit this library dynamic get all page dragable elements */
