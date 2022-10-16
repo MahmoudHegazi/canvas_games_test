@@ -12,4 +12,5 @@ as we can see first on drag start fired, and then drag event keep firing while u
 
 ![image](https://user-images.githubusercontent.com/55125302/196045211-4e89ab33-30ab-4280-a632-a3b880fcd52e.png)
 
+##### How dragevet work, why it has feature not in browser drag start event
 600 means it waits 600 miliseconds to confirm the user is holding mouse to start drag event detecters, for example if user hold the mouse for 100miliseconds and relased this not consider drag event becuase it normal timeout for click vs drag element, so this number let you set how many time to wait to call before fire drage start event, browsers can not do that for drag start normal event. (one of benfits, set some data or send ajax requests before start your canvas drag event process) for example setup take 1 second so if user hold for 600 milisecond only not fire event from begning
