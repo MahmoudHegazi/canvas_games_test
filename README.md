@@ -9,7 +9,7 @@ for example on mouseenter of shape or group of shapes, or mouseout, or click, (p
 
 as we can see first on drag start fired, and then drag event keep firing while user hold the shape/mouse and keep moving the mouse, and finally on drag relase that end both on drag start and on drag evens fired one time at end (due to work async with js/jquery events)
 
-//![image](https://user-images.githubusercontent.com/55125302/196037672-6b3f405a-5f2f-4378-9c72-8553cc14d34d.png)
+!(![image](https://user-images.githubusercontent.com/55125302/196037672-6b3f405a-5f2f-4378-9c72-8553cc14d34d.png))
 
 ![image](https://user-images.githubusercontent.com/55125302/196045211-4e89ab33-30ab-4280-a632-a3b880fcd52e.png)
 
