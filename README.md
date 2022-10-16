@@ -12,4 +12,4 @@ as we can see first on drag start fired, and then drag event keep firing while u
 
 ![image](https://user-images.githubusercontent.com/55125302/196045211-4e89ab33-30ab-4280-a632-a3b880fcd52e.png)
 
-600 means it waits 600 miliseconds to confirm the user is holding mouse to start drag event detecters
+600 means it waits 600 miliseconds to confirm the user is holding mouse to start drag event detecters, for example if user hold the mouse for 100miliseconds and relased this not consider drag event becuase it normal timeout for click vs drag element
