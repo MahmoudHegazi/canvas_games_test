@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+  
+  </style>
+</head>
+<body>
+
+<h2>JavaScript Operators</h2>
+
+<p>x = 5, y = 2, calculate z = x + y, and display z:</p>
+
+<p id="demo"></p>
+<div style="width:400px;height:400px;border:1px solid black;" id="myCanvas">
+<img src="https://ib.3lift.com/static/buttons/edaa/OBA_UK.png">
+</div>
+<script>
+
+/* code for detect mouse hold to generate event like on drage start  */
+/* when make hold time wait smoth it will give advanced mouse user abilty to redit  fast hold-relase mouse action else */
+const holdWait = 600;
+let mouseDown = 0;
+let mouseDragStart = false;
+let mouseDragEvent = false;
+let isMouseDown = false;
+let isMouseDownAndMoved = false;
+let mouseDownTimeouts = [];
+
+const canvasSelector = "#myCanvas";
+
+function clearTimeouts(timeOutsList){
+  timeOutsList.forEach( (timeout)=>{
+    if (timeout){
+      clearTimeout(timeout);
+    }
+  });
+  return [];
+}
+function mouseDownChecker(elmSelector){
+  /* if user hold mouse for 500 mileseconds triger this event*/
+  let oneI = Math.floor(holdWait/3);
+  mouseDownTimeouts = clearTimeouts(mouseDownTimeouts);
+  let timeoutI = 0;
+  for (let i=0; i<3; i++){
+    let mDownTimeout = setTimeout( ()=>{
+    console.log(isMouseDown);
+      if (i==2 && isMouseDown == true){
+        /* on drag start event */
+        mouseDragStart = true;
+        console.log('On drag start event', timeoutI);
+        /* here start check for mouse hold relase event lets say parent and child events */
+                  mouseDownTimeouts = clearTimeouts(mouseDownTimeouts);
+                  
+  /* add event listener that look for move after draging started also this move event cleared when releas */                
+$(elmSelector).bind("mousemove.dragStart", drageOverCB);
+
+
+      }
+    }, timeoutI);
+    timeoutI += oneI;
+    mouseDownTimeouts.push(mDownTimeout);
+  }
+  
+}
+/* drave over like mouseover like draging */
+function drageOverCB(e){
+      if (mouseDragStart === true){
+        console.log("on drag event mouse move while mouse was holded on mouse drag event ");
+        isMouseDownAndMoved = true;
+        mouseDragEvent = true;
+      }
+}
+/* [drag and dragover event, out of canvas will trigger  drag end event] event drop target is canvas it self
+mouseout needed->drag end
+
+! no need mouse drag enter becuase we not move things out of canvas the main event listener generator
+*/
+
+
+/* for example back the image */
+function dragRelaseCancelCB(){
+  console.log("drag relase cancel event when drop items outside the target drop area this called before drag end event to fix the drag changes made")
+}
+
+function mouseDragStartGenerator(elmSelector){
+  
+// mouse down then mouse move this is map
+
+//onmouseleave
+
+$(document).on('mouseup.dragevent_relase_outside', function (event){
+if (isMouseDown){
+/* here point of time before call drag end with cancel status */
+console.log("here check if he will release outside");
+dragRelaseCancelCB(event);
+dragEndCB(event, canvasSelector, true);
+}
+});
+
+
+
+  $(elmSelector).on('mousedown.dragevent mouseup.dragevent', function mouseState(e) {
+      
+      
+      if (e.type == "mouseout" && (isMouseDown == false || mouseDragEvent== false)){
+        /* we only need mouseout when inside the draging area if user leave this area drop the item like mouseup this also alow for move event outside the element*/
+        return false;
+      }
+      /*save cancel infiate mousdrageover listener*/
+      
+      if (e.type == "mousedown") {
+          //code triggers on mouse hold
+          isMouseDown = true;
+          mouseDownChecker(elmSelector);
+
+
+      } else {
+      /*removing isMouseDown always to not count click relase as dragevent relase event */
+      isMouseDown = false;
+      if (mouseDragEvent == true){
+        console.log('on mouse drag relase event');
+        dragEndCB(e, elmSelector, false);
+      }
+      /*
+      if (mouseDragEvent == true){
+
+      console.log("ok mouse hold relase event", e.type);
+          isMouseDown = false;
+          mouseDragEvent = false;
+      }  */   
+      }
+
+  });
+}
+
+      
+
+const AllDragbleElms = getDragableElms();
+if (AllDragbleElms && AllDragbleElms.length){
+  AllDragbleElms.forEach( (dragableEvent)=>{
+  
+   /* end mouse drag This drag event fix so it ended  only with cancel status becuase it will never start custom drag */
+    $(dragableEvent).on('drag', (event)=>{
+      if (mouseDragEvent || isMouseDown || mouseDragStart){
+            dragEndCB(event, canvasSelector, true);
+      }
+
+    });
+  
+  });
+}
+
+
+
+
+function dragEndCB(event, elmSelector=canvasSelector, cancled=false){
+
+      isMouseDown = false;
+        mouseDragStart = false;
+        mouseDragEvent = false;
+        isMouseDownAndMoved = false;
+        $(elmSelector).unbind("mousemove.dragStart");
+        $(elmSelector).unbind("mouseup.dragevent_relase_outside");
+      console.log("on drag end event, Cancled:",cancled);
+}
+/*for fit this library dynamic get all page dragable elements */
+function getDragableElms(){
+const dragablePageElms = [];
+var allElms = document.getElementsByTagName("*");
+
+for (var i=0, max=allElms.length; i < max; i++) {
+    if (allElms[i].draggable == true){
+      //console.log(allElms[i].draggable == true);
+      dragablePageElms.push(allElms[i]);
+    }
+     // Do something with the element here
+}
+  return dragablePageElms;
+}
+
+/*good outside canvas if bad css used with positions or even good css so may positioned elm can be drag display on canvas so handle it*/
+
+
+
+mouseDragStartGenerator(canvasSelector);
+</script>
+
+</body>
+</html>
