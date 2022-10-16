@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <h2>Modal Example</h2>
+  <!-- Button to Open the Modal -->
+  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+    Open modal
+  </button>
+
+  <!-- The Modal -->
+  <div class="modal" id="myModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+      
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Modal Heading</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        
+        <!-- Modal body -->
+        <div class="modal-body">
+          Modal body..
+        </div>
+        
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+
+
+
+
+
+<img id="scream" width="35" height="35"
+src="https://i.ibb.co/wYyc259/iconimage.png" alt="The Scream">
+
+<img id="project_image" width="450" height="300"
+src="https://i.ibb.co/sK5HtQy/bulding-image.png" style="position:absolute;left:-15455px;">
+
+
+
+<p>Canvas:</p>
+
+<button onclick="drawProject()">Redraw things</button>
+
+<div id="currentStamp"></div>
+<canvas id="myCanvas" width="450" height="300"
+style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.
+</canvas>
+
+<script>
+$(document).on('testEvent', function(e, eventInfo) { 
+  subscribers = $('.subscribers-testEvent');
+  subscribers.trigger('testEventHandler', [eventInfo]);
+});
+
+
+const stampW = 35;
+const stampH = 35;
+
+const projectStamps = [{title: 'repear', image_id: 'scream', x: 100, y: 100, id: 1}, {title: 'fix', image_id: 'scream', x: 200, y: 100, id: 2}, {title: 'development', image_id: 'scream', x: 50, y: 0, id: 3}, {title: 'guarding', image_id: 'scream', x: 170, y: 0, id: 4}];
+
+/* AI event listener fired when any shapes taregts clicked on canvas fast and accurate */
+
+$(document).on('canvasStampClick', function(e, eventInfo) { 
+  //subscribers = $('.subscribers-testEvent');
+  console.log("hi canvasStampClick AI event listener", e,eventInfo);
+  $("#currentStamp").html(`<span class="badge badge-secondary">${eventInfo.shape.title}</span>`);
+});
+
+
+
+let currentShapes = [];
+const canvas = document.getElementById("myCanvas");
+const ctx = canvas.getContext("2d");
+
+function validStampObj(stamp){
+    if (!stamp || typeof(stamp.x) !== 'number' || typeof(stamp.y) !== 'number' || typeof(stamp.image_id) === 'undefined' || !document.getElementById(stamp.image_id)){
+      return false;
+    } else {
+      return true;
+    }
+}
+
+
+function addStamp(stamp){
+    if (!validStampObj(stamp)){
+      console.log("can not add stamp, invalid object");
+      return false;
+    }
+    
+     const image = document.getElementById(stamp.image_id);
+    stamp['w'] = image.getBoundingClientRect().width;
+    stamp['h'] = image.getBoundingClientRect().height;
+    
+    ctx.drawImage(image, stamp.x, stamp.y, stamp.w, stamp.h);
+    currentShapes.push(stamp);
+    return stamp;
+    
+}
+
+let id = 1;
+
+window.onload = function() {
+
+drawProject();
+
+  canvas.addEventListener("click", (event)=>{   
+    console.log(detectClickMonsters({event: event, x:event.clientX, y:event.offsetY, w:stampW, h:stampH}));
+
+
+
+
+//getRealNearstNumbers(isTouchFromRL, x:event.offsetX, y:event.offsetY, w:stampW, h:stampH});
+//console.log(shapesDirections, isTouchFromRL, isTouchFromTB);
+    return false;
+
+  });
+  
+
+
+
+};
+
+/*search function good for ranged attacks and get samiler number sizes in list of numbers */
+function getNearetNumbers(x=[],y=0,nearRange=3,ai=true){
+const nearest = [];
+const indexAdded = [];
+for (let i=0; i<x.length; i++){
+    for (let r=nearRange; r<y; r++){
+        /*array performance*/
+        if (!indexAdded.includes(i)){
+           if (Math.abs((x[i] - y)) <= nearRange){
+               //console.log("yes found one", x[i]);
+               nearest.push(x[i]);
+               indexAdded.push(i);
+           }
+        }
+
+    }
+}
+return {nearest: nearest, indexAdded: indexAdded};
+}
+
+
+function getDirectionLists(shapesList=[]){
+  const directLists = {xList: [], yList: [], wList: [], hList: []};
+  shapesList.forEach( (shapeObj)=>{
+    if (validStampObj(shapeObj)){
+      directLists.xList.push(shapeObj.x);
+      directLists.yList.push(shapeObj.y);
+      directLists.wList.push(shapeObj.w);
+      directLists.hList.push(shapeObj.h);
+    }
+  });
+  return directLists;
+}
+
+function detectClickMonsters(championCompass){
+
+  let clickedShapes = [];
+  currentShapes.forEach( (shape)=>{
+    if (championCompass.x > shape.x && championCompass.x < shape.x+shape.w  && (championCompass.y > shape.y && championCompass.y < shape.y+shape.h)){
+      clickedShapes.push(shape);
+      /* trigger my custom event listener  */
+      $(document).trigger('canvasStampClick', {shape: shape, event: championCompass.event});
+      }
+  });
+  return clickedShapes;
+}
+
+
+
+function clearCanvas(){
+  currentShapes = [];
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  return true;
+}
+
+const projectImage = document.getElementById("project_image");
+
+function drawProject(){
+  if (!projectImage){console.log('missing project image element');return false;} 
+  clearCanvas();
+  ctx.drawImage(projectImage,0,0);
+  projectStamps.forEach( (stamp)=>{
+    addStamp(stamp);
+  });
+ // console.log(currentShapes);
+}
+
+function removeStamp(targetId){
+  let targetI = false;
+  for (let i=0; i<projectStamps.length; i++){
+    if (projectStamps[i].id == targetId){
+      targetI = i;
+      break;
+    }
+  }
+  if (targetI !== false){
+    /* remove the stamp from drawing stamps list and redraw the data */
+    projectStamps.splice(targetI,1);
+    drawProject();
+  }
+}
+//removeStamp(3);
+
+</script>
+
+</body>
+</html>
