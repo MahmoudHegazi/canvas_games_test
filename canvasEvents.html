@@ -63,7 +63,7 @@ src="https://i.ibb.co/sK5HtQy/bulding-image.png" style="position:absolute;left:-
 <button onclick="drawProject()">Redraw things</button>
 
 <div id="currentStamp">
-<span class="badge badge-secondary"></span>
+
 </div>
 <canvas id="myCanvas" width="450" height="300"
 style="border:1px solid #d3d3d3;">
@@ -75,21 +75,35 @@ Your browser does not support the HTML5 canvas tag.
 const stampW = 35;
 const stampH = 35;
 
-const projectStamps = [{title: 'repear', image_id: 'scream', x: 100, y: 100, id: 1}, {title: 'fix', image_id: 'scream', x: 200, y: 100, id: 2}, {title: 'development', image_id: 'scream', x: 50, y: 0, id: 3}, {title: 'guarding', image_id: 'scream', x: 170, y: 0, id: 4}];
+const projectStamps = [{title: 'repear', image_id: 'scream', x: 100, y: 100, id: 1},{title: 'repear2', image_id: 'scream', x: 100, y: 100, id: 122}, {title: 'fix', image_id: 'scream', x: 200, y: 100, id: 2}, {title: 'development', image_id: 'scream', x: 50, y: 0, id: 3}, {title: 'guarding', image_id: 'scream', x: 170, y: 0, id: 4}];
 
 /* AI event listener fired when any shapes taregts clicked on canvas fast and accurate */
 
 $(document).on('canvasStampClick', function(e, eventInfo) { 
   //subscribers = $('.subscribers-testEvent');
   console.log("hi canvasStampClick AI event listener CanvasEvents", e,eventInfo);
-  $("#currentStamp span").text(`${eventInfo.shape.title}`);
+  
+        $("#currentStamp").html(`<span class="badge badge-secondary">${eventInfo.shape.title}</span>`);
+});
+
+$(document).on('canvasGroupStampClick', function(e, eventInfo) {
+$("#currentStamp").html('');
+  //subscribers = $('.subscribers-testEvent');
+  console.log("hi canvasGroupStampClick AI event listener CanvasEvents", e,eventInfo);
+
+  if (eventInfo && eventInfo.shapes && eventInfo.shapes.length){
+    eventInfo.shapes.forEach( (clickedShape)=>{
+      $("#currentStamp").append(`<span class="badge badge-secondary">${clickedShape.title}</span>`);
+    });
+  }
+  
 });
 
 $(document).on('canvasStampUnFocus', function(e, eventInfo) { 
   console.log('canvasStampUnFocus Event Listener CanvasEvents');
   
-  if ($("#currentStamp span").text() !== ''){
-      $("#currentStamp span").text('');
+  if ($("#currentStamp").html() !== ''){
+      $("#currentStamp").html('');
   }
 
 });
@@ -147,7 +161,15 @@ const data = detectClickMonsters({event: event, x:event.clientX, y:event.offsetY
 if (data && data.length > 0){
 
       /* trigger my custom event listener stampClicked/Focused */
-      $(document).trigger('canvasStampClick', {shape: data[0], event: event});
+
+      /*fire event for all clicked elements shapes */
+      
+      if (data.length == 1){
+      $(document).trigger('canvasStampClick', {shape: data[0], event: event});   
+      } else {
+       $(document).trigger('canvasGroupStampClick', {shapes: data, event: event});  
+      }
+
       
       
 } else {
