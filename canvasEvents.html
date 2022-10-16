@@ -62,7 +62,9 @@ src="https://i.ibb.co/sK5HtQy/bulding-image.png" style="position:absolute;left:-
 
 <button onclick="drawProject()">Redraw things</button>
 
-<div id="currentStamp"></div>
+<div id="currentStamp">
+<span class="badge badge-secondary"></span>
+</div>
 <canvas id="myCanvas" width="450" height="300"
 style="border:1px solid #d3d3d3;">
 Your browser does not support the HTML5 canvas tag.
@@ -79,9 +81,19 @@ const projectStamps = [{title: 'repear', image_id: 'scream', x: 100, y: 100, id:
 
 $(document).on('canvasStampClick', function(e, eventInfo) { 
   //subscribers = $('.subscribers-testEvent');
-  console.log("hi canvasStampClick AI event listener", e,eventInfo);
-  $("#currentStamp").html(`<span class="badge badge-secondary">${eventInfo.shape.title}</span>`);
+  console.log("hi canvasStampClick AI event listener CanvasEvents", e,eventInfo);
+  $("#currentStamp span").text(`${eventInfo.shape.title}`);
 });
+
+$(document).on('canvasStampUnFocus', function(e, eventInfo) { 
+  console.log('canvasStampUnFocus Event Listener CanvasEvents');
+  
+  if ($("#currentStamp span").text() !== ''){
+      $("#currentStamp span").text('');
+  }
+
+});
+
 
 /*remove stamp event listener */
 
@@ -126,8 +138,22 @@ window.onload = function() {
 drawProject();
 
   canvas.addEventListener("click", (event)=>{  
-  $("#currentStamp").html("");
-    console.log(detectClickMonsters({event: event, x:event.clientX, y:event.offsetY, w:stampW, h:stampH}));
+
+
+const data = detectClickMonsters({event: event, x:event.clientX, y:event.offsetY, w:stampW, h:stampH});
+
+
+/* valid stamp click accion event click hander before end triger event lister canvasStampClick (study now in begning)  */
+if (data && data.length > 0){
+
+      /* trigger my custom event listener stampClicked/Focused */
+      $(document).trigger('canvasStampClick', {shape: data[0], event: event});
+      
+      
+} else {
+      /* trigger my custom event listener clickedEmptyArea no stamp unFocused stamp event (use it when work with stampclick) */
+      $(document).trigger('canvasStampUnFocus', {event: event});
+}
 
 
 
@@ -183,8 +209,6 @@ function detectClickMonsters(championCompass){
   currentShapes.forEach( (shape)=>{
     if (championCompass.x > shape.x && championCompass.x < shape.x+shape.w  && (championCompass.y > shape.y && championCompass.y < shape.y+shape.h)){
       clickedShapes.push(shape);
-      /* trigger my custom event listener  */
-      $(document).trigger('canvasStampClick', {shape: shape, event: championCompass.event});
       }
   });
   return clickedShapes;
