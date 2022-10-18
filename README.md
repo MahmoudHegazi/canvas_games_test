@@ -19,3 +19,8 @@ as we can see first on drag start fired, and then drag event keep firing while u
 #### dragging events order of trigger and event info 
 
 ![image](https://user-images.githubusercontent.com/55125302/196053316-09e981e4-47ec-4f8e-82f2-6b3c585147d5.png)
+
+
+### current drag events cycle
+
+![image](https://user-images.githubusercontent.com/55125302/196429428-8f801385-2f2d-4912-9348-7eb33117693c.png)
