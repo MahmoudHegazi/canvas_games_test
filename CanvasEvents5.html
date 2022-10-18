@@ -198,8 +198,8 @@ Your browser does not support the HTML5 canvas tag.
     
        const transferObj = getTheNotNullID(dataTransfer);
        
-       
-       if (isValidDragTransferObj()){
+       if (isValidDragTransferObj(transferObj)){
+
           $(document).trigger('CanvasDragStart', {
              shape: dataTransfer[transferObj.uniqueid].getData.data,
              event: dataTransfer[transferObj.uniqueid].getData.event,
@@ -440,9 +440,10 @@ Your browser does not support the HTML5 canvas tag.
   }
   
 /*   Drag Events Listener STarts (developer work) */
-
+var dragEventsTransfer = {};
 $(document).on('CanvasDragStart', function(e, eventInfo) {
-  console.log("My First Drag Event listener.", eventInfo);
+  console.log("My First Drag Event listener.", eventInfo);           
+
 });
 
 $(document).on('CanvasDragOver', function(e, eventInfo) {
@@ -460,7 +461,7 @@ const stampH = 35;
 
 //const stampsHoverDelay = 400;
 const hoverBgZero = "rgba(50, 250,10, 0.3)";
-const hoverBgOne = "rgba(10, 220,250, 0.1)";
+const hoverBgOne = "rgba(170, 170,240, 0.3)";
 
 
 const projectStamps = [{
@@ -620,7 +621,7 @@ function CanvasHoverEffect(stamp) {
 
   
  
-  const border = {id: borders.length, frogienKey: stamp.id, title: 'border', x: stamp.x, y: stamp.y, w: stamp.w+5, h: stamp.h+5};
+  const border = {id: borders.length, frogienKey: stamp.id, title: 'border', x: stamp.x, y: stamp.y, w: stamp.w+1, h: stamp.h+1};
      
       
   var grd = ctx.createLinearGradient(0,0,50,0);
