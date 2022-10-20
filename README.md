@@ -24,3 +24,9 @@ as we can see first on drag start fired, and then drag event keep firing while u
 ### current drag events cycle
 
 ![image](https://user-images.githubusercontent.com/55125302/196429428-8f801385-2f2d-4912-9348-7eb33117693c.png)
+
+
+### what makes canvas events speical becuase, it generated canvas components events based on real javascript events, and also it acts near 100% as the good points in browser drag events, and avoid issues.
+
+you may think this real drag event but this canvas rect image
+
