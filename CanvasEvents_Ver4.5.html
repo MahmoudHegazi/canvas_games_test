@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    .noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Modal Example</h2>
+  <!-- Button to Open the Modal -->
+  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+    Open modal
+  </button>
+
+  <!-- The Modal -->
+  <div class="modal" id="myModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Modal Heading</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+
+        <!-- Modal body -->
+        <div class="modal-body">
+          Modal body..
+        </div>
+
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+
+
+
+<img id="scream" width="35" height="35"
+src="https://i.ibb.co/wYyc259/iconimage.png" alt="The Scream">
+
+<img id="project_image" width="450" height="300"
+src="https://i.ibb.co/sK5HtQy/bulding-image.png" style="position:absolute;left:-15455px;">
+
+
+<p>Canvas:</p>
+
+<button onclick="drawProject()">Redraw things</button>
+
+<div id="currentStamp">
+
+</div>
+<canvas id="myCanvas" width="450" height="300"
+style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.
+</canvas>
+
+<script>
+
+/*
+ CanvasEvents Library Start
+*/
+
+  /* this map of js events and settimes that set on drag all events no one of used made by js dom or real event listener direct (no ondrag Add event listener)*/
+  /* code for detect mouse hold to generate event like on drage start  */
+  /* when make hold time wait smoth it will give advanced mouse user abilty to redit  fast hold-relase mouse action else , this can provide drag DOM, Canvas, and javascript events before  drag event listener created based on other existing event not random js */
+
+  var stampsSettings = {
+    mouseEnterStamp: false,
+    dragStartSuccessStampCb: null,
+    dragStartfalidStampCb: null
+  }
+   
+  var dataTransfer = {
+  };
+ 
+
+  function getTheNotNullID(dataObj){
+    for (key in dataObj){
+      if (dataObj[key] && dataObj[key]['getData'] && dataObj[key]['getData']['status'] == "processing"){
+         return dataObj[key];
+      }
+    }
+  }
+  
+  function updateDataTransferStatus(dataObj, status='completed'){
+    for (key in dataObj){
+      if (dataObj[key] && dataObj[key]['getData'] && dataObj[key]['getData']['status'] == "processing"){
+         dataObj[key]['getData']['status'] = status;
+         return dataObj;
+      }
+    }
+    return dataObj;
+  }
+  
+  
+
+  var settings = {
+    holdWait: 30,
+    delayBeforeLastCursor: 150,
+    mouseDragStart: false,
+    mouseDragEvent: false,
+    isMouseDown: false,
+    isMouseDownAndMoved: false,
+    mouseDownTimeouts: [],
+    eventCursors: {
+      dragEnd: 'default',
+      dragStart: 'grab',
+      drageOver: 'grabbing',
+      dragRelaseCancel: 'none',
+      dragOverOutTarget: 'no-drop',
+      drop: 'grab'
+    },
+    canvasSelector: ''
+  }
+
+
+  function clearTimeouts(timeOutsList) {
+    timeOutsList.forEach((timeout) => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    });
+    return [];
+  }
+  /*function to validate if the data transfer object hold all event data */
+  function isValidDragTransferObj(transferObj){
+   return transferObj && transferObj.uniqueid && dataTransfer[transferObj.uniqueid] && dataTransfer[transferObj.uniqueid].getData && dataTransfer[transferObj.uniqueid].getData.data && dataTransfer[transferObj.uniqueid].getData.event;
+  }
+ 
+  
+
+  //startDragLeaveListener
+  function mouseDownChecker(event, elmSelector) {
+    /* if user hold mouse for 500 mileseconds triger this event*/
+    let oneI = Math.floor(settings.holdWait / 3);
+    settings.mouseDownTimeouts = clearTimeouts(settings.mouseDownTimeouts);
+    let timeoutI = 0;
+    for (let i = 0; i < 3; i++) {
+      let mDownTimeout = setTimeout(() => {
+        console.log(settings.isMouseDown);
+        
+        /*now by adding check for stampsSettings.mouseEnterStamp which connect this native drag event and stamps event and start drag only when on shape best perofrmance */
+        if (i == 2 && settings.isMouseDown == true && stampsSettings.mouseEnterStamp === true) {
+          /* on drag start event */
+          settings.mouseDragStart = true;
+          console.log('On drag start event', timeoutI);
+          /* here start check for mouse hold relase event lets say parent and child events */
+          settings.mouseDownTimeouts = clearTimeouts(settings.mouseDownTimeouts);
+
+          /* add event listener that look for move after draging started also this move event cleared when releas */
+          $(elmSelector).bind("mousemove.dragStart", (event) => {
+            drageOverCB(event, elmSelector);
+          });
+          onDragStartCB(event, elmSelector);
+
+
+        }
+      }, timeoutI);
+      timeoutI += oneI;
+      settings.mouseDownTimeouts.push(mDownTimeout);
+    }
+
+  }
+
+  /* on drag start callback
+  more info Look Document for drag over event
+  */
+  function onDragStartCB(event, elmSelector) {
+  
+    const thisDragEvent = event;
+  /*connection to start draging canvas item, check if user within the stamp this value auto changed */
+  console.log('here', stampsSettings.mouseEnterStamp === true);
+    if (settings.mouseDragStart === true) {
+    
+    /* #############    Here First Reciving OF stamps event data of shapes     ###################### */
+    if ( stampsSettings.dragStartSuccessStampCb){
+    /* let stamps call back set the stamp and event data then get it here within drag event dragStartSuccessStampCb void function for setting data like object java set data */
+     stampsSettings.dragStartSuccessStampCb();
+     /* here get the unique id*/
+      console.log("Here Recived Shape and event data ", getTheNotNullID(dataTransfer));
+    }
+    
+    if (dataTransfer){
+    
+       const transferObj = getTheNotNullID(dataTransfer);
+       
+       if (isValidDragTransferObj(transferObj)){
+
+          $(document).trigger('CanvasDragStart', {
+             shape: dataTransfer[transferObj.uniqueid].getData.data,
+             event: dataTransfer[transferObj.uniqueid].getData.event,
+             event_id: transferObj.uniqueid,
+             transferObjState: transferObj,
+             dragEvent: thisDragEvent
+          });
+       }
+    }
+
+      document.body.style.cursor = settings.eventCursors.dragStart;
+      console.log("DragStart Event: trigered one time  before drag over event and after set all drag start process.");
+
+
+      /* this first relation of events betwen drag start and drag leave , the mouseout start binded here in this point of time*/
+      startDragLeaveListener(event, elmSelector);
+
+    }
+  }
+
+
+
+  /* drave over like mouseover like draging */
+  function drageOverCB(event, elmSelector) {
+    /* get the draged shape data object  from dataTransfer object */
+    
+    const thisDragEvent = event;
+    if (settings.mouseDragStart === true) {
+      
+      settings.isMouseDownAndMoved = true;
+      settings.mouseDragEvent = true;
+      document.body.style.cursor = settings.eventCursors.drageOver;
+      console.log("on drag event mouse move while mouse was holded on mouse drag event ");
+      if (dataTransfer){
+        /*  console.log("Reciveing Datatransfer and trigger dragover", transferObj); */
+        const transferObj = getTheNotNullID(dataTransfer);
+        if (isValidDragTransferObj(transferObj)){
+            $(document).trigger('CanvasDragOver', {
+               shape: dataTransfer[transferObj.uniqueid].getData.data,
+               event: dataTransfer[transferObj.uniqueid].getData.event,               
+               event_id: transferObj.uniqueid,
+               elmSelector: elmSelector,
+               transferObjState: transferObj,
+               dragEvent: thisDragEvent
+            });
+            
+         }      
+      }
+          
+      
+      
+    }
+  }
+
+  function dragLeaveCB(event, elmSelector = settings.canvasSelector) {
+    /*  unbound drag leave listener until enter set it */
+    $(elmSelector).unbind("mouseout.dragover_out_target");
+
+    document.body.style.cursor = settings.eventCursors.dragOverOutTarget;
+
+    console.log("DragEventLeave: !!! HI, Iam dragleave event trigger one time when item outside drop area (mouseout-while draging event is on");
+
+    /* start listen for drag mouse enter after drag leave event fired and finish all it's process */
+    startDragEnterListener(event, elmSelector);
+  }
+
+
+  function dragEnterCB(event, elmSelector = settings.canvasSelector) {
+    $(elmSelector).unbind("mouseenter.dragover_enter_target", );
+
+    console.log("DragEventEnter: !!! HI, Iam  event drag event enter trigger one time one drag item draged back to drop area (mouseenter-while draging is on");
+
+    /* to continue cycle, drag leave event at end of its process bind enter event liting and now after enter finished all process start listing back for drag leave, at drag end any drag event removed  */
+    startDragLeaveListener(event, elmSelector);
+
+  }
+
+
+  /* On drop event */
+  function dragDropCB(event, elmSelector) {
+    console.log("Drop Event: happend after mouseup while dragging is on within the draop area I trigger dropend event after I finished with cancel false status");
+    document.body.style.cursor = settings.eventCursors.drop;
+    
+    /* trigger CanvasDrop event */
+    if (dataTransfer){
+        /*  console.log("Reciveing Datatransfer and trigger dragover", transferObj); */
+        const transferObj = getTheNotNullID(dataTransfer);
+        if (isValidDragTransferObj(transferObj)){
+            $(document).trigger('CanvasDrop', {
+               shape: dataTransfer[transferObj.uniqueid].getData.data,
+               event: dataTransfer[transferObj.uniqueid].getData.event,               
+               event_id: transferObj.uniqueid,
+               elmSelector: elmSelector,
+               transferObjState: transferObj,
+               dropEvent: event
+            });
+            
+         }      
+    } 
+    dragEndCB(event, elmSelector, false);
+  }
+
+
+  /* image is moved by developer user in event listener so any cancel will not move image from beging */
+  function dragRelaseCancelCB(event, elmSelector, externalTagret) {
+
+    document.body.style.cursor = settings.eventCursors.dragRelaseCancel;
+    console.log("drag relase cancel event when drop items outside the target drop area this called before drag end event to fix the drag changes made");
+    
+    /* trigger CanvasRelaseCancel event New Event to web */
+    if (dataTransfer){
+        /*  console.log("Reciveing Datatransfer and trigger dragover", transferObj); */
+        const transferObj = getTheNotNullID(dataTransfer);
+        if (isValidDragTransferObj(transferObj)){
+            $(document).trigger('CanvasRelaseCancel', {
+               shape: dataTransfer[transferObj.uniqueid].getData.data,
+               event: dataTransfer[transferObj.uniqueid].getData.event,               
+               event_id: transferObj.uniqueid,
+               elmSelector: elmSelector,
+               transferObjState: transferObj,
+               relaseCancelEvent: event
+            });
+            
+         }      
+    }
+    dragEndCB(event, elmSelector, true);
+  }
+
+
+
+  let lastCursorTimeout = null;
+  /* settings.canvasSelector should never becuase all cycles provide elmSelector, but this last plan in case missing settings.canvasSelector */
+  function dragEndCB(event, elmSelector = settings.canvasSelector, cancled = false) {
+
+    settings.isMouseDown = false;
+    settings.mouseDragStart = false;
+    settings.mouseDragEvent = false;
+    settings.isMouseDownAndMoved = false;
+    $(elmSelector).unbind("mousemove.dragStart");
+    $(elmSelector).unbind("mouseup.dragevent_relase_outside");
+
+    /* out then enter that drag one possible option for drag enter */
+    $(elmSelector).unbind("mouseout.dragover_out_target");
+
+    $(elmSelector).unbind("mouseenter.dragover_enter_target");
+
+    /* delay before style change of cursor */
+    if (lastCursorTimeout) {
+      clearTimeout(lastCursorTimeout);
+
+    }
+    lastCursorTimeout = setTimeout(() => {
+      document.body.style.cursor = settings.eventCursors.dragEnd;
+    }, settings.delayBeforeLastCursor);
+    
+    /*here we set the last transaction status to completed or cancled*/
+    if (cancled){
+       dataTransfer = updateDataTransferStatus(dataTransfer, 'cancled');
+    } else {
+       dataTransfer = updateDataTransferStatus(dataTransfer, 'completed');
+    }
+    
+    console.log("on drag end event, Cancled:", cancled);
+  }
+
+
+
+
+  /* drag leave must happend before enter becuase targetdrop and target item container are the canvas 1 elm so you can not enter  and out from same element must out from same elm and  then enter back to same element */
+
+  function startDragLeaveListener(event, elmSelector = settings.canvasSelector) {
+
+    $(elmSelector).on('mouseout.dragover_out_target', function(event) {
+      if (settings.mouseDragStart && settings.mouseDragEvent) {
+        console.log("hi started leave check listing");
+        dragLeaveCB(event, elmSelector);
+
+      }
+
+
+    });
+  }
+  /* relation function starat listing for drag enter event after drag start event complete this performance/async level to to be same point of time of listing and triger js event listeners used*/
+  function startDragEnterListener(event, elmSelector = settings.canvasSelector) {
+    $(elmSelector).on('mouseenter.dragover_enter_target', function(event) {
+
+      if (settings.mouseDragStart && settings.mouseDragEvent) {
+        console.log("hi started drag enter check listing");
+        dragEnterCB(event, elmSelector);
+
+      }
+
+
+
+    });
+
+
+  }
+
+
+  function mouseDragStartGenerator(elmSelector) {
+
+    if (!$(elmSelector).length) {
+      console.log(`invalid selector provided ${elmSelector}`);
+      return false;
+    }
+    settings.canvasSelector = elmSelector;
+    $(elmSelector).addClass("noselect");
+    fixDargConfliect(elmSelector);
+
+
+    $(document).on('mouseup.dragevent_relase_outside', function(event) {
+      /*isMouseDown maybe true when first mouse down pressed */
+      if (settings.mouseDragStart || settings.mouseDragEvent) {
+        /* here point of time before call drag end with cancel status */
+        console.log("here checked the user drag item outside drop area and dropped it ");
+
+        dragRelaseCancelCB(event, elmSelector, document);
+      }
+    });
+
+
+    $(elmSelector).on('mousedown.dragevent mouseup.dragevent', function mouseState(e) {
+
+
+
+      /*save cancel infiate mousdrageover listener*/
+
+      if (e.type == "mousedown") {
+        //code triggers on mouse hold
+        settings.isMouseDown = true;
+        mouseDownChecker(e, elmSelector);
+
+
+      } else {
+        /*removing isMouseDown always to not count click relase as dragevent relase event */
+        settings.isMouseDown = false;
+        if (settings.mouseDragEvent == true) {
+          /* on mouse drag relase event [drag drop event] trigger point of time*/
+          dragDropCB(event, elmSelector);
+        }
+      }
+
+    });
+  }
+
+
+  /*for fit this library dynamic get all page dragable elements */
+  function getDragableElms() {
+    const dragablePageElms = [];
+    var allElms = document.getElementsByTagName("*");
+
+    for (var i = 0, max = allElms.length; i < max; i++) {
+      if (allElms[i].draggable == true) {
+        //console.log(allElms[i].draggable == true);
+        dragablePageElms.push(allElms[i]);
+      }
+      // Do something with the element here
+    }
+    return dragablePageElms;
+  }
+
+  function fixDargConfliect(elmSelector) {
+    const AllDragbleElms = getDragableElms();
+    if (AllDragbleElms && AllDragbleElms.length) {
+      AllDragbleElms.forEach((dragableEvent) => {
+
+        /* end mouse drag This drag event fix so it ended  only with cancel status becuase it will never start custom drag */
+        $(dragableEvent).on('drag', (event) => {
+          if (settings.mouseDragEvent || settings.isMouseDown || settings.mouseDragStart) {
+            dragEndCB(event, elmSelector, true);
+          }
+        });
+
+
+      });
+    }
+  }
+  
+/*   Drag Events Listener STarts (developer work) */
+var dragEventsTransfer = {};
+$(document).on('CanvasDragStart', function(e, eventInfo) {
+  console.log("My First Drag Event listener.", eventInfo);           
+
+});
+
+$(document).on('CanvasDragOver', function(e, eventInfo) {
+  console.log("Reciveing Datatransfer shape from drag event listener ", eventInfo);
+  
+  //console.log("\n\n\n\n", eventInfo, '\n\n\n');
+});
+
+
+$(document).on('CanvasDrop', function(e, eventInfo) {
+  if (!eventInfo || !eventInfo.dropEvent || !eventInfo.transferObjState || !eventInfo.transferObjState.getData || !eventInfo.transferObjState.getData.data || !eventInfo.transferObjState.getData.data.id || !eventInfo.elmSelector){
+    console.log("this flash message, unknown error unable to move the icon");
+    return false;
+  }
+  console.log("Reciveing Datatransfer shape from drop event listener ", eventInfo);
+  /*easy as developer now control any shape*/
+  //MoveStampIcon(eventInfo.transferObjState.data, eventInfo.transferObjState);
+  
+  const canvasElm = document.querySelector(eventInfo.elmSelector);
+  const shape = eventInfo.transferObjState.getData.data;
+  
+  if (canvasElm){
+     const rect = canvasElm.getBoundingClientRect();
+    const x = eventInfo.dropEvent.clientX - rect.left; /*x position within the element */
+    const y = eventInfo.dropEvent.clientY - rect.top; /*y position within the element.*/
+    
+    
+    const newX = x - (shape.w / 2);
+    const newY = y - (shape.h / 2);
+    
+    let success = MoveStampIcon(shape.id, newX, newY);
+    console.log("\n\n\n\n", eventInfo,newX,newY, '\n\n\n');  
+  }
+
+});
+
+
+$(document).on('CanvasRelaseCancel', function(e, eventInfo) {
+  console.log("Reciveing Datatransfer from drag relase cancel this new event data just info and used for back any changes made if drag faliure also let u able even to make changes using data transfer when event cancled on canvas shape for example game and user not able to drop this item in required place so hide this item for example important event", eventInfo);
+  
+  console.log("\n\n\n\n", eventInfo, '\n\n\n');
+});
+
+
+
+/* Start Drag Events */
+mouseDragStartGenerator('#myCanvas');
+/*Canvas Events Library ends */
+const stampW = 35;
+const stampH = 35;
+
+//const stampsHoverDelay = 400;
+const hoverBgZero = "rgba(50, 250,10, 0.3)";
+const hoverBgOne = "rgba(170, 170,240, 0.3)";
+
+
+const projectStamps = [{
+  title: 'repear',
+  image_id: 'scream',
+  x: 100,
+  y: 100,
+  id: 1
+}, {
+  title: 'repear2',
+  image_id: 'scream',
+  x: 100,
+  y: 100,
+  id: 122
+}, {
+  title: 'fix',
+  image_id: 'scream',
+  x: 200,
+  y: 100,
+  id: 2
+}, {
+  title: 'development',
+  image_id: 'scream',
+  x: 50,
+  y: 0,
+  id: 3
+}, {
+  title: 'guarding',
+  image_id: 'scream',
+  x: 170,
+  y: 0,
+  id: 4
+}];
+
+/* AI event listener fired when any shapes taregts clicked on canvas fast and accurate */
+
+
+let stampEventsOn = true;
+let stampEventsMouseOn = true;
+$(document).on('canvasStampClick', function(e, eventInfo) {
+
+  if (!stampEventsOn) {
+    return false;
+  }
+  //subscribers = $('.subscribers-testEvent');
+  console.log("hi canvasStampClick AI event listener CanvasEvents", e, eventInfo);
+
+  $("#currentStamp").html(`<span class="badge badge-secondary">${eventInfo.shape.title}</span>`);
+});
+
+$(document).on('canvasGroupStampClick', function(e, eventInfo) {
+  if (!stampEventsOn) {
+    return false;
+  }
+  $("#currentStamp").html('');
+  //subscribers = $('.subscribers-testEvent');
+  console.log("hi canvasGroupStampClick AI event listener CanvasEvents", e, eventInfo);
+
+  if (eventInfo && eventInfo.shapes && eventInfo.shapes.length) {
+    eventInfo.shapes.forEach((clickedShape) => {
+      $("#currentStamp").append(`<span class="badge badge-secondary">${clickedShape.title}</span>`);
+    });
+  }
+});
+
+/* onStampMouseEnter (1 time called only when enter stamp) */
+$(document).on('stampMouseEnter', function(e, eventInfo) {
+
+  if (!stampEventsMouseOn) {
+    return false;
+  }
+  //console.log(eventInfo, 'here');
+  CanvasHoverEffect(eventInfo.shape);
+  /*
+  if (!settings.mouseDragStart && !settings.mouseDragEvent && !settings.isMouseDown){
+  $("#myCanvas").css('cursor', 'pointer');
+  }*/
+  /*settings.mouseDragStart || settings.mouseDragEvent || settings.isMouseDown*/
+  
+  console.log("stamp stampMouseEnter event listener");
+  // replace with canvas helight $("#myCanvas").css('cursor', 'pointer');
+});
+
+/* onStampMouseOut (1 time called only when out from stamp) only recive one target, but it also have in event all targets has the same event in same point of time in each trigers  */
+
+  
+  
+  
+
+
+$(document).on('stampMouseOut', function(e, eventInfo) {
+  if (!stampEventsMouseOn) {
+    return false;
+  }
+  
+  /*relational database point */
+    removeBorder(eventInfo.shape.id, true);
+
+  
+  
+  /*
+    if (!settings.mouseDragStart && !settings.mouseDragEvent && !settings.isMouseDown){
+$("#myCanvas").css('cursor', 'default');
+  }
+  */
+  
+  console.log("stamp stampMouseOut event listener");
+  /*we can name this canvas.stamp:hover but with js*/
+
+  //$("#myCanvas").css('cursor', 'default');
+
+});
+
+
+
+$(document).on('canvasStampUnFocus', function(e, eventInfo) {
+  if (!stampEventsOn) {
+    return false;
+  }
+  console.log('canvasStampUnFocus Event Listener CanvasEvents');
+
+  if ($("#currentStamp").html() !== '') {
+    $("#currentStamp").html('');
+  }
+
+});
+
+
+/*remove stamp event listener */
+
+$(document).on('canvasStampRemove', function(e, eventInfo) {
+  console.log("hi canvasStampRemove AI event listener", e, eventInfo);
+});
+
+
+let currentShapes = [];
+const canvas = document.getElementById("myCanvas");
+const ctx = canvas.getContext("2d");
+
+function validStampObj(stamp) {
+  if (!stamp || typeof(stamp.x) !== 'number' || typeof(stamp.y) !== 'number' || typeof(stamp.image_id) === 'undefined' || !document.getElementById(stamp.image_id)) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+
+let borders = [];
+
+function CanvasHoverEffect(stamp) {
+  if (!validStampObj(stamp)) {
+    console.log("can not add stamp, invalid object");
+    return false;
+  }
+  
+
+  
+ 
+  const border = {id: borders.length, frogienKey: stamp.id, title: 'border', x: stamp.x, y: stamp.y, w: stamp.w+1, h: stamp.h+1};
+     
+      
+  var grd = ctx.createLinearGradient(0,0,50,0);
+  grd.addColorStop(0,hoverBgZero);
+  grd.addColorStop(1,hoverBgOne);
+  ctx.fillStyle = grd;
+  ctx.fillRect(border.x, border.y, border.w, border.h);
+  borders.push(border);
+
+
+  
+
+
+}
+
+function removeBorder(stampPrimaryKey) {
+  let targetI = false;
+  for (let i = 0; i < borders.length; i++) {
+    if (borders[i].frogienKey == stampPrimaryKey) {
+      targetI = i;
+      break;
+    }
+  }
+  if (targetI !== false) {
+    /* remove the stamp from drawing stamps list and redraw the data */
+    borders.splice(targetI, 1);
+    drawProject();
+  }
+}
+
+
+function addStamp(stamp) {
+  if (!validStampObj(stamp)) {
+    console.log("can not add stamp, invalid object");
+    return false;
+  }
+
+  const image = document.getElementById(stamp.image_id);
+  stamp['w'] = image.getBoundingClientRect().width;
+  stamp['h'] = image.getBoundingClientRect().height;
+
+  ctx.drawImage(image, stamp.x, stamp.y, stamp.w, stamp.h);
+  currentShapes.push(stamp);
+  return stamp;
+
+}
+
+let id = 1;
+
+let currentMouseEnters = [];
+let currentMouseEntersShapes = [];
+window.onload = function() {
+  /* Use Canvas Events Library */
+  mouseDragStartGenerator('#myCanvas');
+
+  drawProject();
+
+
+/*      const timeId = new Date().getTime();
+  dataTransfer[timeId] = {uniqueid: timeId, getData:} */
+  /* mousemove on canvas but target generate mouse was enter stamp but it now mouseover with js best was excute one time detect shapes but mouse enter in canvasevents */
+  canvas.addEventListener("mousemove", (event) => {
+
+    const data = detectClickMonsters({
+      event: event,
+      x: event.clientX,
+      y: event.offsetY,
+      w: stampW,
+      h: stampH
+    });
+    if (data && data.length) {
+      /* stamp mouse move and mouse enter events */
+      data.forEach((shape) => {
+        /* canvasEvents mouse enter */
+        if (!currentMouseEnters.includes(shape.id)) {
+          currentMouseEntersShapes.push(shape);
+          currentMouseEnters.push(shape.id);
+          /*set first then trigger so event if need check will asynced*/
+          stampsSettings.mouseEnterStamp = true;
+          stampsSettings.dragStartSuccessStampCb = function(){
+            const stampShape =  shape;
+            const stampEvent = event;
+            const timeId = new Date().getTime();
+            dataTransfer[timeId] = {uniqueid: timeId, getData:{data: shape, event: event, status: 'processing'}}
+            return true;
+          };
+          /*
+          stampsSettings.dragStartfalidStampCb = function(){
+            for (key in dataTransfer){
+              dataTransfer[key] = null;
+            }
+            return true;
+          };
+          */
+          $(document).trigger('stampMouseEnter', {
+            shape: shape,
+            shapes: data,
+            event: event
+          });
+
+        }
+      });
+    } else {
+      /*this first event mouseout call direct after mouse over  stamp event */
+      /* stamp mouse out event (this generated from mousemove event) */
+
+      if (currentMouseEntersShapes.length > 0) {
+        /*this means this first mouseout after mouse get out of stamp so we call our mouseout (remember this all mouse move event 3 from one also this make event call more performance as it call it only when stamp out not when mouse over no shapes work also with stampmouse over */
+        currentMouseEntersShapes.forEach((mouseOutShape) => {
+
+          /* maybe mouse outed from more than one shape */
+          /* set value for mouseEnterStamp to false */
+          stampsSettings.mouseEnterStamp = false;
+          $(document).trigger('stampMouseOut', {
+            shape: mouseOutShape,
+            shapes: currentMouseEntersShapes,
+            shapesid: currentMouseEnters,
+            event: event
+          });
+        });
+
+      }
+
+
+      currentMouseEnters = [];
+      currentMouseEntersShapes = [];
+    }
+    
+    /* Here canvas shapes events data and mouse move within canvas   */
+    //console.log(data, event.clientX, event.offsetY);
+  });
+  /* on stamp drag event top one */
+  /*used for generate stamp click event */
+  canvas.addEventListener("click", (event) => {
+
+
+    const data = detectClickMonsters({
+      event: event,
+      x: event.clientX,
+      y: event.offsetY,
+      w: stampW,
+      h: stampH
+    });
+
+
+    /* valid stamp click accion event click hander before end triger event lister canvasStampClick (study now in begning)  */
+    if (data && data.length > 0) {
+
+      /* trigger my custom event listener stampClicked/Focused */
+
+      /*fire event for all clicked elements shapes */
+
+      if (data.length == 1) {
+        $(document).trigger('canvasStampClick', {
+          shape: data[0],
+          event: event
+        });
+      } else {
+        $(document).trigger('canvasGroupStampClick', {
+          shapes: data,
+          event: event
+        });
+      }
+
+
+
+    } else {
+      /* trigger my custom event listener clickedEmptyArea no stamp unFocused stamp event (use it when work with stampclick) (when click on no stamps)*/
+      $(document).trigger('canvasStampUnFocus', {
+        event: event
+      });
+    }
+
+
+
+
+    //getRealNearstNumbers(isTouchFromRL, x:event.offsetX, y:event.offsetY, w:stampW, h:stampH});
+    //console.log(shapesDirections, isTouchFromRL, isTouchFromTB);
+    return false;
+
+  });
+
+
+
+
+};
+
+/*search function good for ranged attacks and get samiler number sizes in list of numbers */
+function getNearetNumbers(x = [], y = 0, nearRange = 3, ai = true) {
+  const nearest = [];
+  const indexAdded = [];
+  for (let i = 0; i < x.length; i++) {
+    for (let r = nearRange; r < y; r++) {
+      /*array performance*/
+      if (!indexAdded.includes(i)) {
+        if (Math.abs((x[i] - y)) <= nearRange) {
+          //console.log("yes found one", x[i]);
+          nearest.push(x[i]);
+          indexAdded.push(i);
+        }
+      }
+
+    }
+  }
+  return {
+    nearest: nearest,
+    indexAdded: indexAdded
+  };
+}
+
+
+function getDirectionLists(shapesList = []) {
+  const directLists = {
+    xList: [],
+    yList: [],
+    wList: [],
+    hList: []
+  };
+  shapesList.forEach((shapeObj) => {
+    if (validStampObj(shapeObj)) {
+      directLists.xList.push(shapeObj.x);
+      directLists.yList.push(shapeObj.y);
+      directLists.wList.push(shapeObj.w);
+      directLists.hList.push(shapeObj.h);
+    }
+  });
+  return directLists;
+}
+
+function detectClickMonsters(championCompass) {
+
+  let clickedShapes = [];
+  currentShapes.forEach((shape) => {
+    if (championCompass.x > shape.x && championCompass.x < shape.x + shape.w && (championCompass.y > shape.y && championCompass.y < shape.y + shape.h)) {
+      clickedShapes.push(shape);
+    }
+  });
+  return clickedShapes;
+}
+
+
+
+function clearCanvas() {
+  currentShapes = [];
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  return true;
+}
+
+const projectImage = document.getElementById("project_image");
+
+function drawProject() {
+  if (!projectImage) {
+    console.log('missing project image element');
+    return false;
+  }
+  clearCanvas();
+  ctx.drawImage(projectImage, 0, 0);
+  projectStamps.forEach((stamp) => {
+    addStamp(stamp);
+  });
+  // console.log(currentShapes);
+}
+
+function removeStamp(targetId) {
+  let targetI = false;
+  for (let i = 0; i < projectStamps.length; i++) {
+    if (projectStamps[i].id == targetId) {
+      targetI = i;
+      break;
+    }
+  }
+  if (targetI !== false) {
+    /* remove the stamp from drawing stamps list and redraw the data */
+    projectStamps.splice(targetI, 1);
+    drawProject();
+    $(document).trigger('canvasStampRemove', {
+      shape: projectStamps[targetI]
+    });
+  }
+}
+removeStamp(3);
+
+
+function MoveStampIcon(targetId, newX, newY){
+
+  if (!targetId || !newX || !newY){
+    console.log("missing one or more of required arugments", targetId, newX, newY);
+    return null;
+  }
+  if (isNaN(newX) || isNaN(newY)){
+    console.log("invalid x or y options only numbers accepted", newX, newY);
+    return null;
+  }
+  
+  
+
+  let targetI = false;
+  for (let i = 0; i < projectStamps.length; i++) {
+    if (projectStamps[i] && projectStamps[i].id == targetId) {
+      targetI = i;
+      break;
+    }
+  }
+  /*just very simple change the x and y of the tagret shape object and redraw app no delete and recreate */
+  if (targetI !== false) {
+    projectStamps[targetI]['x'] = newX;
+    projectStamps[targetI]['y'] = newY;
+    drawProject();
+    console.log("\n\n\n\n hi", targetId, "\n\n\n\n\n");
+    return projectStamps[targetI];
+  }
+  
+  return null;
+}
+</script>
+
+</body>
+</html>
